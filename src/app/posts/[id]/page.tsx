@@ -39,6 +39,34 @@ export default function Page() {
     });
   };
 
+  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const form = e.target as HTMLFormElement;
+    const contentTextarea = form.elements.namedItem(
+      "content"
+    ) as HTMLTextAreaElement;
+
+    contentTextarea.value = contentTextarea.value.trim();
+
+    if (contentTextarea.value.length === 0) {
+      alert("내용을 입력해주세요.");
+      contentTextarea.focus();
+      return;
+    }
+
+    apiFetch(`/api/v1/posts/${id}/comments`, {
+      method: "POST",
+      body: JSON.stringify({
+        content: contentTextarea.value,
+      }),
+    }).then((data) => {
+      alert(data.msg);
+      apiFetch(`/api/v1/posts/${id}/comments`).then(setPostComments);
+      router.replace(`/posts/${id}`);
+    });
+  };
+
   useEffect(() => {
     apiFetch(`/api/v1/posts/${id}`).then(setPost);
     apiFetch(`/api/v1/posts/${id}/comments`).then(setPostComments);
@@ -71,6 +99,17 @@ export default function Page() {
 
       <hr className="my-2" />
 
+      <h2>댓글 작성폼</h2>
+      <form className="flex flex-col gap-2 p-2" onSubmit={handleSubmit}>
+        <textarea
+          className="border p-2 rounded"
+          name="content"
+          placeholder="댓글"
+        />
+        <button className="border p-2 rounded" type="submit">
+          저장
+        </button>
+      </form>
       <h2>댓글 목록</h2>
 
       {postComments == null && <div>댓글 로딩중...</div>}
