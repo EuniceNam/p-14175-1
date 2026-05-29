@@ -13,7 +13,9 @@ export default function Page() {
   const id = Number(idStr);
 
   const [post, setPost] = useState<PostWithContentDto | null>(null);
-  const [postComments, setPostComments] = useState<PostCommentDto[] | null>(null);
+  const [postComments, setPostComments] = useState<PostCommentDto[] | null>(
+    null
+  );
 
   const deletePost = (id: number) => {
     apiFetch(`/api/v1/posts/${id}`, {
@@ -22,6 +24,18 @@ export default function Page() {
       alert(data.msg);
 
       router.replace("/posts");
+    });
+  };
+
+  const deleteComment = (id: number, commentId: number) => {
+    apiFetch(`/api/v1/posts/${id}/comments/${commentId}`, {
+      method: "DELETE",
+    }).then((data) => {
+      alert(data.msg);
+
+      apiFetch(`/api/v1/posts/${id}/comments`).then(setPostComments);
+
+      router.replace(`/posts/${id}`);
     });
   };
 
@@ -68,7 +82,19 @@ export default function Page() {
       {postComments != null && postComments.length > 0 && (
         <ul>
           {postComments.map((comment) => (
-            <li key={comment.id}>{comment.content}</li>
+            <li key={comment.id}>
+              {comment.content}
+              {/* <div className="flex gap-2"> */}
+              <button
+                className="p-1 rounded border cursor-pointer"
+                onClick={() =>
+                  confirm(`댓글을 정말로 삭제하시겠습니까?`) &&
+                  deleteComment(id, comment.id)
+                }
+              >
+                삭제
+              </button>
+            </li>
           ))}
         </ul>
       )}
