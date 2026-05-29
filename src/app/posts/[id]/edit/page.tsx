@@ -1,13 +1,23 @@
 "use client";
 
 import { apiFetch } from "@/lib/backend/client";
-import { useParams, useRouter } from "next/navigation";
+import { PostWithContentDto } from "@/type/post";
+import { useRouter } from "next/navigation";
+import { use, useEffect, useState } from "react";
 
-export default function Page() {
+export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
 
-  const { id: idStr } = useParams<{ id: string }>();
+  const { id: idStr } = use(params);
   const id = Number(idStr);
+
+  const [post, setPost] = useState<PostWithContentDto | null>(null);
+
+  useEffect(() => {
+    apiFetch(`/api/v1/posts/${id}`).then(setPost);
+  }, []);
+
+  if (post == null) return <div>로딩중...</div>;
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -38,7 +48,6 @@ export default function Page() {
     apiFetch(`/api/v1/posts/${id}`, {
       method: "PUT",
       body: JSON.stringify({
-        id: id,
         title: titleInput.value,
         content: contentTextarea.value,
       }),
@@ -51,7 +60,7 @@ export default function Page() {
 
   return (
     <>
-      <h1>글 수정 페이지</h1>
+      <h1>{id}번 글 수정</h1>
 
       <form className="flex flex-col gap-2 p-2" onSubmit={handleSubmit}>
         <input
@@ -59,23 +68,18 @@ export default function Page() {
           type="text"
           name="title"
           placeholder="새 제목"
+          autoFocus
+          defaultValue={post.title}
         />
         <textarea
           className="border p-2 rounded"
           name="content"
           placeholder="새 내용"
+          defaultValue={post.content}
         />
-        <div className="flex gap-2">
-          {/* <button
-            className="border p-2 rounded"
-            onClick={() => window.history.back()}
-          >
-            취소
-          </button> */}
-          <button className="border p-2 rounded" type="submit">
-            저장
-          </button>
-        </div>
+        <button className="border p-2 rounded" type="submit">
+          저장
+        </button>
       </form>
     </>
   );
