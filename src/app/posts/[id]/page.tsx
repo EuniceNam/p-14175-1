@@ -33,9 +33,9 @@ export default function Page() {
     }).then((data) => {
       alert(data.msg);
 
-      apiFetch(`/api/v1/posts/${id}/comments`).then(setPostComments);
+      if (postComments == null) return;
 
-      router.replace(`/posts/${id}`);
+      setPostComments(postComments.filter((c) => c.id != commentId));
     });
   };
 
