@@ -59,6 +59,12 @@ export default function Page() {
       return;
     }
 
+    if (contentTextarea.value.length < 2) {
+      alert("댓글 내용을 2자 이상 입력해주세요.");
+      contentTextarea.focus();
+      return;
+    }
+
     apiFetch(`/api/v1/posts/${id}/comments`, {
       method: "POST",
       body: JSON.stringify({
@@ -107,12 +113,14 @@ export default function Page() {
 
       <hr className="my-2" />
 
-      <h2>댓글 작성폼</h2>
+      <h2>댓글 작성</h2>
       <form className="flex gap-2" onSubmit={handleCommentWriteFormSubmit}>
         <textarea
           className="border p-2 rounded"
           name="content"
           placeholder="댓글 내용"
+          maxLength={100}
+          rows={5}
         />
         <button className="border p-2 rounded" type="submit">
           작성
